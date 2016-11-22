@@ -1,5 +1,5 @@
 import openpyxl
-from process_data_functions import generate_header_names, generate_exported_files_list, generate_column_index_from_string
+from process_data_functions import generate_modified_date_header_names, generate_modified_date_column_ints, generate_string_from_column_index, generate_header_names, generate_exported_files_list, generate_column_index_from_string, generate_modified_date_header_names
 from openpyxl import Workbook #Interact with Excel
 import os #Handle file names and paths
 
@@ -25,16 +25,22 @@ base_columns_ints = generate_column_index_from_string(base_columns)
 id_column = "A" #Column that has the unique identifier, typically an ID, is located to do comparisons
 base_headers = generate_header_names(base_sheet,base_columns)
 
-merged_date_modified_columns = generated_modified_date_column_ints(base_columns_ints)
-merged_date_modified_headers = generated_modified_date_header_names(base_headers)
+merged_date_modified_columns_ints = generate_modified_date_column_ints(base_columns_ints)
+merged_date_modified_columns = generate_string_from_column_index(merged_date_modified_columns_ints)
+merged_date_modified_headers = generate_modified_date_header_names(base_headers)
 
-merged_date_created_column = max(base_columns_ints)*2 + 1 #add this column after the last column of the modified file  (len(base_columns) + len(modified_columns)) gives the last column, +1 to get an empty column 
+merged_date_created_column = generate_string_from_column_index(max(base_columns_ints)*2 + 1) #add this column after the last column of the modified file  (len(base_columns) + len(modified_columns)) gives the last column, +1 to get an empty column 
 merged_date_created_header = "Created Date"
 
+print(merged_date_created_column)
 
 #Copy the values of the headers in the base_sheet to the merged_sheet
-for index in range(len(base_columns)):
-	merged_sheet[base_columns[index] + "1"] = base_headers[index]
+for index in range(0,len(base_columns)):
+	merged_sheet[base_columns[index] + "1"].value = base_headers[index]
+
+for index in range(0,len(merged_date_modified_columns_ints)):
+	merged_sheet[merged_date_modified_columns[index]+ "1"].value = merged_date_modified_headers[index]
+
 merged_sheet[merged_date_created_column + "1"] = merged_date_created_header
 
 #Copy the values of the cells in the base_sheet to the merged_sheet

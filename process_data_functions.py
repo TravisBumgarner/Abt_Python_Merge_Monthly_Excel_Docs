@@ -21,13 +21,25 @@ def generate_column_index_from_string(list_of_columns):
 		modified_list_of_columns.append(modified_each)
 	return modified_list_of_columns
 
-def generated_modified_date_header_names(base_headers):
+def generate_string_from_column_index(list_of_columns):
+	try:
+		modified_list_of_columns = []
+		for each in list_of_columns:
+			modified_each = openpyxl.utils.get_column_letter(each)
+			modified_list_of_columns.append(modified_each)
+		return modified_list_of_columns
+	except:
+		return openpyxl.utils.get_column_letter(list_of_columns)
+
+
+
+def generate_modified_date_header_names(base_headers):
 	modified_headers = []
 	for each in base_headers:
 		modified_headers.append(each + "-Modified")
 	return modified_headers
 
-def generated_modified_date_column_ints(base_columns_ints):
+def generate_modified_date_column_ints(base_columns_ints):
 	modified_columns_ints =[]
 	for each in base_columns_ints:
 		modified_columns_ints.append(each+len(base_columns_ints))
