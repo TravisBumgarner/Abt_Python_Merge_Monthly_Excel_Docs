@@ -15,11 +15,15 @@ def generate_exported_files_list(files_directory):
 	return exported_files_list
 
 def generate_column_index_from_string(list_of_columns):
-	modified_list_of_columns = []
-	for each in list_of_columns:
-		modified_each = openpyxl.utils.column_index_from_string(each)
-		modified_list_of_columns.append(modified_each)
-	return modified_list_of_columns
+	try: 
+		modified_list_of_columns = []
+		for each in list_of_columns:
+			modified_each = openpyxl.utils.column_index_from_string(each)
+			modified_list_of_columns.append(modified_each)
+		return modified_list_of_columns
+	except:
+		return openpyxl.utils.column_index_from_string(list_of_columns)
+
 
 def generate_string_from_column_index(list_of_columns):
 	try:
