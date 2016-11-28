@@ -1,17 +1,4 @@
-User,Is X Done?,Is Y done?,Is X Done?- Mod Date,Is Y done?- Mod Date
-1,no,no
-2,no,yes
-3,yes,no
-4,no,no
-6,no,yes
-7,no,no
-8,no,no
-9,no,no
-10,yes,no
-11,no,no
-12,no,yes
-13,no,no
-14,no,no
-15,no,no
-16,no,no
-17,yes,no
+User,Is X Done?,Is Y done?,Is X Done?- Mod Date,Is Y done?- Mod Date,Created Date
+1,no,no,Null,2016-08,2016-07
+2,no,yes,Null,Null,2016-08
+3,yes,no,Null,Null,2016-08
