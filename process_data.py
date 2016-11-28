@@ -1,17 +1,88 @@
 import openpyxl
-from process_data_functions import generate_modified_date_header_names, generate_modified_date_column_ints, generate_string_from_column_index, generate_header_names, generate_exported_files_list, generate_column_index_from_string, generate_modified_date_header_names
+from process_data_functions import generate_modified_date_header_names, generate_modified_date_column_ints, generate_header_names, generate_exported_files_list, generate_modified_date_header_names
 from openpyxl import Workbook #Interact with Excel
 import os #Handle file names and paths
 
+class Generate_Column_Data(object):
+	"""
+	Input a single/list of excel column(s) and return ints and strs.
+	"""
+	def __init__(self, columns_as_a_list, column_with_id=""):
+		# Convert to a list if not.
+		if not (isinstance(columns_as_a_list, list)):
+			columns_as_a_list = [columns_as_a_list]
 
-#User Defined Settings:
+		# If the list is strings, generate .columns_str and convert to .columns_int
+		if (isinstance(columns_as_a_list[0], str)):
+			self.columns_str = columns_as_a_list
+			modified_list_of_columns = []
+			for column in columns_as_a_list:
+				modified_column = openpyxl.utils.column_index_from_string(column)
+				modified_list_of_columns.append(modified_column)
+			self.columns_int = modified_list_of_columns
+
+		# If the list is ints, generate .columns_int and convert to .columns_str
+		if (isinstance(columns_as_a_list[0], int)):
+			# If the list is strings, generate .columns_str and convert to .columns_int
+			self.columns_int = columns_as_a_list
+
+			modified_list_of_columns = []
+			for column in columns_as_a_list:
+				modified_column = openpyxl.utils.get_column_letter(column)
+				modified_list_of_columns.append(modified_column)
+			self.columns_str = modified_list_of_columns
+
+		#If there is a user id column entered
+		if (column_with_id != ""):
+			if (isinstance(columns_as_a_list[0], str)):
+				#Convert id Column to int
+				self.column_with_id_str = column_with_id
+				self.column_with_id_int = openpyxl.utils.column_index_from_string(column_with_id)
+
+			if (isinstance(columns_as_a_list[0], int)):
+				# Convert id Column to str
+				self.column_with_id_int = column_with_id
+				self.column_with_id_str = openpyxl.utils.get_column_letter(column_with_id)
+
+			try:
+				columns_int = self.columns_int[:]
+				columns_str = self.columns_str[:]
+				columns_int.remove(self.column_with_id_int)
+				columns_str.remove(self.column_with_id_str)
+				self.columns_int_no_id = columns_int
+				self.columns_str_no_id = columns_str
+			except(ValueError):
+				print("ID column not found in list")
+				return None
+		else:
+			self.columns_int_no_id = self.columns_int
+			self.columns_str_no_id = self.columns_str
+
+		#Generate [0,1,2...
+		self.indecies = []
+		for i in range(0, len(self.columns_int)): self.indecies.append(i)
+
+		#Generate [0,1,2... minus the ID column
+		self.indecies_no_id = []
+		for i in range(0, len(self.columns_int)): self.indecies_no_id.append(i)
+		if(column_with_id != ""):
+			self.indecies_no_id.remove(columns_as_a_list.index(column_with_id))
+		else:
+			self.indecies_no_id = self.indecies
+		print("yes")
+
+##################################################################
+#User Defined Settings############################################
+##################################################################
 directory_with_exported_files = "Exports"
 filename_of_merged_excel_docs = "MergedResults.xlsx"
 workbook_sheet_name_of_memrged_excel_doc = "Sheet1"
-columns_to_merge_together = ["A","B","C","D"]
-column_with_unique_id = "A"
+columns_to_merge_together = [1,3,4] #As list or, single string, single int
+column_with_unique_id = 1 #as single string, single int, no lists
 
-#Get list of current files
+##################################################################
+#Setup Base File, Merged File, and Directory of Exported Files####
+##################################################################
 exported_files_directory = directory_with_exported_files
 exported_files_list = generate_exported_files_list(exported_files_directory)
 
@@ -27,35 +98,48 @@ merged_workbook = openpyxl.Workbook()
 merged_sheet = merged_workbook.active 
 merged_sheet.title = workbook_sheet_name_of_memrged_excel_doc
 
+##################################################################
+#Define Columns###################################################
+##################################################################
 #Type in list of columns to use which will also generate a list of the names of the headers
-base_columns = columns_to_merge_together 
-base_columns_ints = generate_column_index_from_string(base_columns)
-id_column = column_with_unique_id #Column that has the unique identifier, typically an ID, is located to do comparisons
-base_columns_without_id = base_columns[:]
-base_columns_without_id.remove(id_column)
-base_columns_without_id_ints =  generate_column_index_from_string(base_columns_without_id)
-#print(base_columns_without_id)
-base_headers = generate_header_names(base_sheet,base_columns)
+base = Generate_Column_Data(columns_to_merge_together, column_with_id = column_with_unique_id)
+base_headers = generate_header_names(base_sheet,base.columns_str)
 
-merged_date_modified_columns_ints = generate_modified_date_column_ints(base_columns_ints)
-len_of_merged_columns = len(merged_date_modified_columns_ints)
-merged_date_modified_columns = generate_string_from_column_index(merged_date_modified_columns_ints)
-#print(merged_date_modified_columns)
-merged_date_modified_headers = generate_modified_date_header_names(base_headers)
+#Generate a list for the merged columns
+#1 to base.columns_int is space for the copied base columns. base.columns_int to base.columns_int_no_id is
+# for columns for date modified columns.
+merged_columns = []
+for i in range(1,len(base.columns_int + base.columns_int_no_id)+1): merged_columns.append(i)
+merged = Generate_Column_Data(merged_columns)
 
-merged_date_created_column = generate_string_from_column_index(max(base_columns_ints)*2 + 1) #add this column after the last column of the modified file  (len(base_columns) + len(modified_columns)) gives the last column, +1 to get an empty column 
-merged_date_created_header = "Created Date"
+merged_headers = generate_modified_date_header_names(base_headers,base.indecies_no_id)
+print(merged_headers)
 
-#print(merged_date_created_column)
+
+#merged_date_created_column = generate_string_from_column_index(max(base_ints)*2 + 1) #add this column after the last column of the modified file  (len(base) + len(modified_columns)) gives the last column, +1 to get an empty column
+#merged_date_created_header = "Created Date"
+
 
 #Copy the values of the headers in the base_sheet to the merged_sheet
-for index in range(0,len(base_columns)):
-	merged_sheet[base_columns[index] + "1"].value = base_headers[index]
 
-#print(merged_date_modified_headers)
-#print(merged_date_modified_columns)
+##################################################################
+#Add Columns to Merge Doc#########################################
+##################################################################
+
+#Add base headers to merged_sheet
+for column in base.columns_str:
+	index = 0
+	merged_sheet[column + "1"].value = base_headers[index]
+	index +=1
+
+
+
+
+merged_workbook.save(merged_file)
+
+"""
+#Add date modified headers to merged_sheet
 for index in range(0,len(merged_date_modified_columns_ints)):
-	#print(index)
 	merged_sheet[merged_date_modified_columns[index]+ "1"].value = merged_date_modified_headers[index]
 
 
@@ -63,10 +147,11 @@ merged_sheet[merged_date_created_column + "1"] = merged_date_created_header
 
 #Copy the values of the cells in the base_sheet to the merged_sheet
 for index_row in range(2,base_sheet.max_row+1):
-	for index_col in base_columns:
+	for index_col in base:
 		merged_sheet[index_col+str(index_row)].value = base_sheet[index_col+str(index_row)].value
 	merged_sheet[merged_date_created_column + str(index_row)] = base_file_name
-
+"""
+"""
 
 def loop_through_non_base_files(exported_files_list): 
 	#loop through all files not used to generate base file by using 1:
@@ -93,7 +178,7 @@ def loop_through_non_base_files(exported_files_list):
 
 					#In this space will be a function that compares each 
 
-					for base_column in base_columns_without_id:
+					for base_column in base_without_id:
 						base_column_int = generate_column_index_from_string(base_column)
 						if(loop_sheet[base_column + str(loop_row)].value != merged_sheet[base_column + str(merged_row)].value ):
 							#print(base_column_int)
@@ -108,7 +193,7 @@ def loop_through_non_base_files(exported_files_list):
 		# For the rows that were not found, append them to the end of the document. 
 		merged_sheet_empty_last_row = merged_sheet.max_row+1
 		for loop_row_not_found in loop_rows_not_found:
-			for  index_col in base_columns:
+			for  index_col in base:
 				 merged_sheet[index_col+str(merged_sheet_empty_last_row)].value = loop_sheet[index_col+str(loop_row_not_found)].value
 			merged_sheet[merged_date_created_column + str(merged_sheet_empty_last_row)].value = loop_file_name
 			merged_sheet_empty_last_row += 1
@@ -116,7 +201,7 @@ def loop_through_non_base_files(exported_files_list):
 
 loop_through_non_base_files(exported_files_list)
 
-
+"""
 
 #Check whether the above cells match the expected string contents
 """
