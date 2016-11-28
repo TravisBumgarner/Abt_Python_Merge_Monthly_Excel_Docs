@@ -1,4 +1,18 @@
-User,Is X Done?,Is Y done?,Is X Done?- Mod Date,Is Y done?- Mod Date,Created Date
-1,no,no,Null,2016-08,2016-07
-2,no,yes,Null,Null,2016-08
-3,yes,no,Null,Null,2016-08
+User,Is X Done?,Is Y done?,Is Z Done?,Is X Done?- Mod Date,Is Z Done?- Mod Date,Created Date
+1,no,no,no,Null,Null,2016-07
+2,no,no,no,Null,Null,2016-07
+3,yes,no,yes,2016-08,Null,2016-08
+4,no,no,no,Null,Null,2016-07
+5,no,no,no,Null,Null,2016-07
+6,no,no,no,Null,Null,2016-07
+7,no,no,yes,Null,Null,2016-08
+8,no,no,no,Null,Null,2016-07
+9,no,no,no,Null,Null,2016-07
+10,yes,no,yes,2016-08,Null,2016-08
+11,no,no,no,Null,Null,2016-07
+12,no,no,no,Null,Null,2016-07
+13,no,no,no,Null,Null,2016-07
+14,no,no,yes,Null,Null,2016-08
+15,no,no,no,Null,Null,2016-07
+16,no,no,yes,Null,Null,2016-08
+17,yes,no,no,Null,Null,2016-08
